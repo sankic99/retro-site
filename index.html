@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Retro Terminal OS v1.0</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #33ff33; /* 좀 더 진한 터미널 그린 */
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            overflow: hidden; /* 스크롤바 숨기기 */
+        }
+
+        /* CRT 모니터의 미세한 가로줄 효과 */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #terminal {
+            height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        input {
+            background: transparent;
+            border: none;
+            color: #33ff33;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            width: 80%;
+        }
+
+        .response { color: #00cc00; margin-bottom: 5px; }
+        .error { color: #ff3333; }
+        .highlight { color: #ffff00; }
+    </style>
+</head>
+<body>
+
+<div id="terminal">
+    <div class="response">KOR-NET OS (Version 2.22.2026)</div>
+    <div class="response">Copyright (C) 1994-2026 Archive Inc.</div>
+    <div class="response">접속 성공... 명령어를 입력하십시오. (도움말: help)</div>
+    <br>
+    <div id="history"></div>
+    <div class="input-line">
+        <span>C:\> </span>
+        <input type="text" id="cmd" autofocus onkeydown="handleCommand(event)">
+    </div>
+</div>
+
+<script>
+    const history = document.getElementById('history');
+    const cmdInput = document.getElementById('cmd');
+
+    function handleCommand(e) {
+        if (e.keyCode === 13) { // 엔터키
+            const val = cmdInput.value.toLowerCase().trim();
+            addLine("C:\\> " + val);
+            
+            if (val === 'help') {
+                addLine(" - DIR: 자료실 파일 목록 보기");
+                addLine(" - DOWNLOAD [파일명]: 프로그램 내려받기");
+                addLine(" - CLS: 화면 깨끗이 지우기");
+            } else if (val === 'dir') {
+                addLine(" [목록] ----------------------------");
+                addLine(" 1. MY_APP_V1.EXE  (Size: 1.2MB)");
+                addLine(" 2. RETRO_TOOL.ZIP (Size: 0.8MB)");
+            } else if (val.startsWith('download')) {
+                const file = val.replace('download ', '');
+                addLine(file + " 파일을 요청 중입니다...", "highlight");
+                addLine("다운로드가 시작되었습니다. (팝업 확인 요망)");
+                // 실제 다운로드 링크 연결 예시
+                // window.location.href = "파일경로"; 
+            } else if (val === 'cls') {
+                history.innerHTML = "";
+            } else {
+                addLine("'" + val + "'은(는) 내부 또는 외부 명령, 실행할 수 있는 프로그램, 또는 배치 파일이 아닙니다.", "error");
+            }
+
+            cmdInput.value = "";
+            document.getElementById('terminal').scrollTop = 9999;
+        }
+    }
+
+    function addLine(text, className = "") {
+        const div = document.createElement('div');
+        div.className = "response " + className;
+        div.innerText = text;
+        history.appendChild(div);
+    }
+</script>
+</body>
+</html>
